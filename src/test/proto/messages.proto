@@ -1,0 +1,15 @@
+syntax = "proto2";
+package resources;
+
+option java_package = "io.sokol.finatra.protobuf.messages";
+option java_outer_classname = "Protos";
+
+message Health {
+    enum Status {
+        OK = 0;
+        DEGRADED = 1;
+        UNHEALTHY = 2;
+    }
+
+    optional Status status = 4;
+}
