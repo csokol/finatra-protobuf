@@ -1,4 +1,4 @@
-package io.sokol.finatra.protobuf.integration
+package io.sokol.finatra.protobuf.integration.app
 
 import com.twitter.finagle.http.Request
 import com.twitter.finatra.http.Controller

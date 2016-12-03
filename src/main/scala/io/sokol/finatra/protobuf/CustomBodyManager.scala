@@ -12,35 +12,30 @@ import com.twitter.finagle.http.Request
 import com.twitter.finatra.http.marshalling.{DefaultMessageBodyReader, DefaultMessageBodyWriter, WriterResponse}
 import com.twitter.inject.{InjectorModule, TwitterModule}
 
-object ProtoSerialization {
+object ProtobufMessageModule extends TwitterModule {
+  flag("http.response.charset.enabled", "true", "charset must be enabled")
 
-  object CustomMessageBodyModule extends TwitterModule {
-    flag("http.response.charset.enabled", "true", "doit")
+  override val modules = Seq(InjectorModule)
 
-    override val modules = Seq(InjectorModule)
-
-    override def configure() {
-      bindSingleton[DefaultMessageBodyReader].to[FinatraDefaultMessageBodyReader]
-      bindSingleton[DefaultMessageBodyWriter].to[FinatraDefaultMessageBodyWriter]
-    }
+  override def configure() {
+    bindSingleton[DefaultMessageBodyReader].to[FinatraDefaultMessageBodyReader]
+    bindSingleton[DefaultMessageBodyWriter].to[FinatraDefaultMessageBodyWriter]
   }
-
-  val parser = JsonFormat.parser()
-  val jsonPrinter: Printer = JsonFormat.printer()
 
   @Singleton
   class FinatraDefaultMessageBodyReader extends DefaultMessageBodyReader {
+    val parser = JsonFormat.parser()
+
     override def parse[T: Manifest](request: Request): T = {
-
       def messageClass(implicit manifest: Manifest[T]): Class[_] = manifest.runtimeClass
-
-      val contentType = request.headerMap.get("Content-Type").getOrElse(JSON_UTF_8.toString)
+      val contentType = request.headerMap.getOrElse("Content-Type", JSON_UTF_8.toString)
 
       val parsed = contentType.split(";")(0) match {
         case "application/json" => jsonToProto(request, messageClass)
         case "application/protobuf" => unmarshalProto(request, messageClass)
       }
-      return parsed.asInstanceOf[T]
+
+      parsed.asInstanceOf[T]
     }
 
     def jsonToProto(request: Request, messageClass: Class[_]) = {
@@ -57,12 +52,14 @@ object ProtoSerialization {
   }
 
   class FinatraDefaultMessageBodyWriter extends DefaultMessageBodyWriter {
+    val jsonPrinter: Printer = JsonFormat.printer()
+
     override def write(obj: Any): WriterResponse = {
-      ???
+      ??? //should never be called
     }
 
     override def write(request: Request, obj: Any): WriterResponse = {
-      val accept = request.headerMap.get("Accept").getOrElse(JSON_UTF_8.toString)
+      val accept = request.headerMap.getOrElse("Accept", JSON_UTF_8.toString)
       val message = obj.asInstanceOf[Message]
       accept match {
         case "application/json" => protoAsJson(message)

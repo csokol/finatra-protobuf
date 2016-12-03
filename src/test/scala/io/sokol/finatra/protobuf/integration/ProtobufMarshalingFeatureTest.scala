@@ -8,6 +8,7 @@ import com.twitter.finagle.http.{Request, Response}
 import com.twitter.finatra.http.EmbeddedHttpServer
 import com.twitter.inject.server.FeatureTest
 import com.twitter.util.Await
+import io.sokol.finatra.protobuf.integration.app.TestServer
 import io.sokol.finatra.protobuf.messages.Protos.Health
 import io.sokol.finatra.protobuf.messages.Protos.Health.Status
 import io.sokol.finatra.protobuf.support.RequestFactory
