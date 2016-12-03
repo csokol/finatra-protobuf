@@ -62,7 +62,6 @@ object ProtobufMessageModule extends TwitterModule {
       val accept = request.headerMap.getOrElse("Accept", JSON_UTF_8.toString)
       val message = obj.asInstanceOf[Message]
       accept match {
-        case "application/json" => protoAsJson(message)
         case "application/protobuf" => marshalProto(message)
         case _ => protoAsJson(message)
       }
